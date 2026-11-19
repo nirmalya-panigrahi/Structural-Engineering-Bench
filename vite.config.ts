@@ -6,7 +6,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: process.env.GITHUB_PAGES === 'true' ? '/engineering-bench/' : '/',
+    base: '/Structural-Engineering-Bench/',
     plugins: [
       react(),
       tailwindcss(),
