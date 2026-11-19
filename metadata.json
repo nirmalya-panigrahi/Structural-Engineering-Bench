@@ -1,0 +1,6 @@
+{
+  "name": "StrataBench",
+  "description": "Precision mechanical and civil engineering calculation workbench with interactive analytical plots, real-time parametric inputs, and engineering fine-print tooltips.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
