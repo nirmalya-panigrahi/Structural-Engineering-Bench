@@ -1,4 +1,4 @@
-import { InputFieldSpec } from '../../engine/types';
+import { FinePrintDataValue, InputFieldSpec } from '../../engine/types';
 import { FinePrintTooltip } from './FinePrintTooltip';
 
 interface NumberFieldProps {
@@ -10,6 +10,12 @@ interface NumberFieldProps {
 
 export function NumberField({ field, value, errorMessage, onChange }: NumberFieldProps) {
   if (field.kind === 'select') {
+    const selectedLabel =
+      field.options?.find((opt) => opt.value === String(value))?.label ?? String(value);
+    const selectDataValues: FinePrintDataValue[] = [
+      { label: 'Selected', value: selectedLabel },
+    ];
+
     return (
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-2">
@@ -24,7 +30,12 @@ export function NumberField({ field, value, errorMessage, onChange }: NumberFiel
               </span>
             )}
           </label>
-          <FinePrintTooltip title={field.label} finePrint={field.finePrint} align="right" />
+          <FinePrintTooltip
+            title={field.label}
+            finePrint={field.finePrint}
+            dataValues={selectDataValues}
+            align="right"
+          />
         </div>
         <select
           id={`field-${field.key}`}
@@ -44,6 +55,10 @@ export function NumberField({ field, value, errorMessage, onChange }: NumberFiel
 
   if (field.kind === 'toggle') {
     const checked = Boolean(value);
+    const toggleDataValues: FinePrintDataValue[] = [
+      { label: 'Current State', value: checked ? 'Enabled (Yes)' : 'Disabled (No)' },
+    ];
+
     return (
       <div className="flex items-center justify-between gap-3 py-1">
         <div className="flex items-center gap-1.5">
@@ -53,7 +68,11 @@ export function NumberField({ field, value, errorMessage, onChange }: NumberFiel
           >
             {field.label}
           </label>
-          <FinePrintTooltip title={field.label} finePrint={field.finePrint} />
+          <FinePrintTooltip
+            title={field.label}
+            finePrint={field.finePrint}
+            dataValues={toggleDataValues}
+          />
         </div>
         <button
           id={`field-${field.key}`}
@@ -83,6 +102,23 @@ export function NumberField({ field, value, errorMessage, onChange }: NumberFiel
     numericValue >= field.min &&
     numericValue <= field.max;
 
+  const formattedCurrent =
+    value === ''
+      ? 'Empty'
+      : `${String(value)}${field.unit ? ` ${field.unit}` : ''}`;
+
+  const numberDataValues: FinePrintDataValue[] = [
+    { label: field.symbol ? `Current (${field.symbol})` : 'Current Input', value: formattedCurrent },
+    ...(field.min !== undefined && field.max !== undefined
+      ? [
+          {
+            label: 'Slider Range',
+            value: `${field.min} to ${field.max}${field.unit ? ` ${field.unit}` : ''}`,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
@@ -97,7 +133,12 @@ export function NumberField({ field, value, errorMessage, onChange }: NumberFiel
             </span>
           )}
         </label>
-        <FinePrintTooltip title={field.label} finePrint={field.finePrint} align="right" />
+        <FinePrintTooltip
+          title={field.label}
+          finePrint={field.finePrint}
+          dataValues={numberDataValues}
+          align="right"
+        />
       </div>
 
       <div className="relative flex items-center">

@@ -52,6 +52,34 @@ export function SnCurvePlot({ data }: SnCurvePlotProps) {
       probeFormatter={(lx, ly) =>
         `N = ${Math.pow(10, lx).toExponential(1)} cycles · σ = ${Math.pow(10, ly).toFixed(0)} MPa`
       }
+      tooltipDetails={(lx) => {
+        const cycles = Math.pow(10, lx);
+        const interpCurve = (pts: { cycles: number; stressMPa: number }[]) => {
+          for (let i = 1; i < pts.length; i++) {
+            const p0 = pts[i - 1];
+            const p1 = pts[i];
+            if (cycles >= p0.cycles && cycles <= p1.cycles) {
+              const t =
+                (Math.log10(cycles) - Math.log10(p0.cycles)) /
+                (Math.log10(p1.cycles) - Math.log10(p0.cycles));
+              const logS =
+                Math.log10(p0.stressMPa) +
+                t * (Math.log10(p1.stressMPa) - Math.log10(p0.stressMPa));
+              return Math.pow(10, logS);
+            }
+          }
+          return pts[pts.length - 1].stressMPa;
+        };
+        return [
+          { label: 'Modified S(N)', value: `${interpCurve(data.modifiedCurve).toFixed(1)} MPa` },
+          { label: "Unmodified S'(N)", value: `${interpCurve(data.unmodifiedCurve).toFixed(1)} MPa` },
+          { label: 'Endurance S_e', value: `${data.seMPa.toFixed(1)} MPa` },
+          {
+            label: 'Applied σ_a',
+            value: `${data.appliedStressMPa.toFixed(1)} MPa`,
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

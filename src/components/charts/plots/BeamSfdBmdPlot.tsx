@@ -95,145 +95,186 @@ export function BeamSfdBmdPlot({ data }: BeamSfdBmdPlotProps) {
           </span>
         </div>
 
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${width} ${height}`}
-          role="img"
-          aria-label="Beam Shear Force and Bending Moment Diagrams"
-          onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverX(null)}
-          className="w-full h-auto block cursor-crosshair select-none"
-        >
-          {/* Band 1: Beam Schematic */}
-          {/* UDL distributed arrows */}
-          {Math.abs(data.udlKNm) > 1e-6 && (
-            <g>
-              <line x1={x0} y1={beamY - 22} x2={xL} y2={beamY - 22} className="stroke-amber-500" strokeWidth={1.5} />
-              {Array.from({ length: 9 }).map((_, idx) => {
-                const ax = x0 + ((xL - x0) * idx) / 8;
-                return (
-                  <line
-                    key={idx}
-                    x1={ax}
-                    y1={beamY - 22}
-                    x2={ax}
-                    y2={beamY - 6}
-                    className="stroke-amber-500"
-                    strokeWidth={1.25}
-                  />
-                );
-              })}
-              <text x={(x0 + xL) / 2} y={beamY - 27} textAnchor="middle" className="fill-amber-700 dark:fill-amber-400 font-mono text-[10px]">
-                w = {data.udlKNm} kN/m
-              </text>
-            </g>
-          )}
+        <div className="relative">
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${width} ${height}`}
+            role="img"
+            aria-label="Beam Shear Force and Bending Moment Diagrams"
+            onPointerMove={handlePointerMove}
+            onPointerLeave={() => setHoverX(null)}
+            className="w-full h-auto block cursor-crosshair select-none"
+          >
+            {/* Band 1: Beam Schematic */}
+            {/* UDL distributed arrows */}
+            {Math.abs(data.udlKNm) > 1e-6 && (
+              <g>
+                <line x1={x0} y1={beamY - 22} x2={xL} y2={beamY - 22} className="stroke-amber-500" strokeWidth={1.5} />
+                {Array.from({ length: 9 }).map((_, idx) => {
+                  const ax = x0 + ((xL - x0) * idx) / 8;
+                  return (
+                    <line
+                      key={idx}
+                      x1={ax}
+                      y1={beamY - 22}
+                      x2={ax}
+                      y2={beamY - 6}
+                      className="stroke-amber-500"
+                      strokeWidth={1.25}
+                    />
+                  );
+                })}
+                <text x={(x0 + xL) / 2} y={beamY - 27} textAnchor="middle" className="fill-amber-700 dark:fill-amber-400 font-mono text-[10px]">
+                  w = {data.udlKNm} kN/m
+                </text>
+              </g>
+            )}
 
-          {/* Point Load arrow */}
-          {Math.abs(data.pointLoadKN) > 1e-6 && (
-            <g>
-              <line x1={xLoad} y1={beamY - 36} x2={xLoad} y2={beamY - 5} className="stroke-rose-600" strokeWidth={2.25} />
+            {/* Point Load arrow */}
+            {Math.abs(data.pointLoadKN) > 1e-6 && (
+              <g>
+                <line x1={xLoad} y1={beamY - 36} x2={xLoad} y2={beamY - 5} className="stroke-rose-600" strokeWidth={2.25} />
+                <polygon
+                  points={`${xLoad},${beamY - 4} ${xLoad - 4},${beamY - 12} ${xLoad + 4},${beamY - 12}`}
+                  className="fill-rose-600"
+                />
+                <text x={xLoad + 7} y={beamY - 24} className="fill-rose-700 dark:fill-rose-400 font-mono text-[10px] font-semibold">
+                  P = {data.pointLoadKN} kN
+                </text>
+              </g>
+            )}
+
+            {/* Beam body */}
+            <line x1={x0} y1={beamY} x2={xL} y2={beamY} className="stroke-slate-800 dark:stroke-slate-200" strokeWidth={5} strokeLinecap="butt" />
+
+            {/* Supports */}
+            {data.supportType === 'simply_supported' ? (
               <polygon
-                points={`${xLoad},${beamY - 4} ${xLoad - 4},${beamY - 12} ${xLoad + 4},${beamY - 12}`}
-                className="fill-rose-600"
+                points={`${x0},${beamY + 3} ${x0 - 7},${beamY + 15} ${x0 + 7},${beamY + 15}`}
+                className="fill-slate-600 dark:fill-slate-300"
               />
-              <text x={xLoad + 7} y={beamY - 24} className="fill-rose-700 dark:fill-rose-400 font-mono text-[10px] font-semibold">
-                P = {data.pointLoadKN} kN
-              </text>
-            </g>
-          )}
+            ) : (
+              <rect x={x0 - 6} y={beamY - 14} width={6} height={28} className="fill-slate-700 dark:fill-slate-300" />
+            )}
 
-          {/* Beam body */}
-          <line x1={x0} y1={beamY} x2={xL} y2={beamY} className="stroke-slate-800 dark:stroke-slate-200" strokeWidth={5} strokeLinecap="butt" />
+            {data.supportType !== 'cantilever' && (
+              <circle cx={xL} cy={beamY + 9} r={6} className="fill-none stroke-slate-600 dark:stroke-slate-300" strokeWidth={2} />
+            )}
 
-          {/* Supports */}
-          {data.supportType === 'simply_supported' ? (
-            <polygon
-              points={`${x0},${beamY + 3} ${x0 - 7},${beamY + 15} ${x0 + 7},${beamY + 15}`}
-              className="fill-slate-600 dark:fill-slate-300"
-            />
-          ) : (
-            <rect x={x0 - 6} y={beamY - 14} width={6} height={28} className="fill-slate-700 dark:fill-slate-300" />
-          )}
+            {/* Band 2: Shear Force Diagram */}
+            <text x={padL} y={100} className="fill-slate-700 dark:fill-slate-200 text-[11px] font-semibold">
+              Shear Force V(x) [kN]
+            </text>
+            {vTicks.map((t) => (
+              <g key={`vt-${t}`}>
+                <line x1={padL} y1={sfdMapper.toPxY(t)} x2={width - padR} y2={sfdMapper.toPxY(t)} className="stroke-slate-100 dark:stroke-slate-800" />
+                <text x={padL - 8} y={sfdMapper.toPxY(t) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[10px]">
+                  {formatTick(t)}
+                </text>
+              </g>
+            ))}
+            <line x1={padL} y1={sfdMapper.toPxY(0)} x2={width - padR} y2={sfdMapper.toPxY(0)} className="stroke-slate-300 dark:stroke-slate-600" />
+            <rect x={padL} y={108} width={width - padL - padR} height={154} fill="none" className="stroke-slate-200 dark:stroke-slate-700" />
+            <path d={sfdArea} className="fill-blue-600/15" />
+            <path d={sfdLine} fill="none" className="stroke-blue-600 dark:stroke-blue-400" strokeWidth={2} />
 
-          {data.supportType !== 'cantilever' && (
-            <circle cx={xL} cy={beamY + 9} r={6} className="fill-none stroke-slate-600 dark:stroke-slate-300" strokeWidth={2} />
-          )}
+            {/* Band 3: Bending Moment Diagram */}
+            <text x={padL} y={286} className="fill-slate-700 dark:fill-slate-200 text-[11px] font-semibold">
+              Bending Moment M(x) [kN·m]
+            </text>
+            {mTicks.map((t) => (
+              <g key={`mt-${t}`}>
+                <line x1={padL} y1={bmdMapper.toPxY(t)} x2={width - padR} y2={bmdMapper.toPxY(t)} className="stroke-slate-100 dark:stroke-slate-800" />
+                <text x={padL - 8} y={bmdMapper.toPxY(t) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[10px]">
+                  {formatTick(t)}
+                </text>
+              </g>
+            ))}
+            {xTicks.map((t) => (
+              <g key={`bx-${t}`}>
+                <line x1={bmdMapper.toPxX(t)} y1={108} x2={bmdMapper.toPxX(t)} y2={262} className="stroke-slate-100 dark:stroke-slate-800/60" />
+                <line x1={bmdMapper.toPxX(t)} y1={294} x2={bmdMapper.toPxX(t)} y2={442} className="stroke-slate-100 dark:stroke-slate-800/60" />
+                <text x={bmdMapper.toPxX(t)} y={458} textAnchor="middle" className="fill-slate-500 font-mono text-[10px]">
+                  {formatTick(t)} m
+                </text>
+              </g>
+            ))}
+            <line x1={padL} y1={bmdMapper.toPxY(0)} x2={width - padR} y2={bmdMapper.toPxY(0)} className="stroke-slate-300 dark:stroke-slate-600" />
+            <rect x={padL} y={294} width={width - padL - padR} height={148} fill="none" className="stroke-slate-200 dark:stroke-slate-700" />
+            <path d={bmdArea} className="fill-emerald-600/15" />
+            <path d={bmdLine} fill="none" className="stroke-emerald-600 dark:stroke-emerald-400" strokeWidth={2} />
 
-          {/* Band 2: Shear Force Diagram */}
-          <text x={padL} y={100} className="fill-slate-700 dark:fill-slate-200 text-[11px] font-semibold">
-            Shear Force V(x) [kN]
-          </text>
-          {vTicks.map((t) => (
-            <g key={`vt-${t}`}>
-              <line x1={padL} y1={sfdMapper.toPxY(t)} x2={width - padR} y2={sfdMapper.toPxY(t)} className="stroke-slate-100 dark:stroke-slate-800" />
-              <text x={padL - 8} y={sfdMapper.toPxY(t) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[10px]">
-                {formatTick(t)}
-              </text>
-            </g>
-          ))}
-          <line x1={padL} y1={sfdMapper.toPxY(0)} x2={width - padR} y2={sfdMapper.toPxY(0)} className="stroke-slate-300 dark:stroke-slate-600" />
-          <rect x={padL} y={108} width={width - padL - padR} height={154} fill="none" className="stroke-slate-200 dark:stroke-slate-700" />
-          <path d={sfdArea} className="fill-blue-600/15" />
-          <path d={sfdLine} fill="none" className="stroke-blue-600 dark:stroke-blue-400" strokeWidth={2} />
+            {/* Inflection point markers */}
+            {data.inflectionPointsM.map((ix, idx) => (
+              <g key={idx}>
+                <circle cx={bmdMapper.toPxX(ix)} cy={bmdMapper.toPxY(0)} r={4.5} className="fill-amber-500 stroke-white dark:stroke-slate-900" strokeWidth={1.5} />
+                <text
+                  x={bmdMapper.toPxX(ix)}
+                  y={bmdMapper.toPxY(0) - 9}
+                  textAnchor="middle"
+                  className="fill-amber-700 dark:fill-amber-300 font-mono text-[10px] font-semibold"
+                >
+                  M=0 ({ix.toFixed(2)}m)
+                </text>
+              </g>
+            ))}
 
-          {/* Band 3: Bending Moment Diagram */}
-          <text x={padL} y={286} className="fill-slate-700 dark:fill-slate-200 text-[11px] font-semibold">
-            Bending Moment M(x) [kN·m]
-          </text>
-          {mTicks.map((t) => (
-            <g key={`mt-${t}`}>
-              <line x1={padL} y1={bmdMapper.toPxY(t)} x2={width - padR} y2={bmdMapper.toPxY(t)} className="stroke-slate-100 dark:stroke-slate-800" />
-              <text x={padL - 8} y={bmdMapper.toPxY(t) + 3} textAnchor="end" className="fill-slate-500 font-mono text-[10px]">
-                {formatTick(t)}
-              </text>
-            </g>
-          ))}
-          {xTicks.map((t) => (
-            <g key={`bx-${t}`}>
-              <line x1={bmdMapper.toPxX(t)} y1={108} x2={bmdMapper.toPxX(t)} y2={262} className="stroke-slate-100 dark:stroke-slate-800/60" />
-              <line x1={bmdMapper.toPxX(t)} y1={294} x2={bmdMapper.toPxX(t)} y2={442} className="stroke-slate-100 dark:stroke-slate-800/60" />
-              <text x={bmdMapper.toPxX(t)} y={458} textAnchor="middle" className="fill-slate-500 font-mono text-[10px]">
-                {formatTick(t)} m
-              </text>
-            </g>
-          ))}
-          <line x1={padL} y1={bmdMapper.toPxY(0)} x2={width - padR} y2={bmdMapper.toPxY(0)} className="stroke-slate-300 dark:stroke-slate-600" />
-          <rect x={padL} y={294} width={width - padL - padR} height={148} fill="none" className="stroke-slate-200 dark:stroke-slate-700" />
-          <path d={bmdArea} className="fill-emerald-600/15" />
-          <path d={bmdLine} fill="none" className="stroke-emerald-600 dark:stroke-emerald-400" strokeWidth={2} />
+            {/* Interactive vertical cursor */}
+            {nearestSample && (
+              <g className="pointer-events-none">
+                <line
+                  x1={sfdMapper.toPxX(nearestSample.x)}
+                  y1={beamY}
+                  x2={sfdMapper.toPxX(nearestSample.x)}
+                  y2={442}
+                  className="stroke-blue-500/50"
+                  strokeDasharray="3 3"
+                />
+                <circle cx={sfdMapper.toPxX(nearestSample.x)} cy={sfdMapper.toPxY(nearestSample.shear)} r={4} className="fill-blue-600" />
+                <circle cx={bmdMapper.toPxX(nearestSample.x)} cy={bmdMapper.toPxY(nearestSample.moment)} r={4} className="fill-emerald-600" />
+              </g>
+            )}
+          </svg>
 
-          {/* Inflection point markers */}
-          {data.inflectionPointsM.map((ix, idx) => (
-            <g key={idx}>
-              <circle cx={bmdMapper.toPxX(ix)} cy={bmdMapper.toPxY(0)} r={4.5} className="fill-amber-500 stroke-white dark:stroke-slate-900" strokeWidth={1.5} />
-              <text
-                x={bmdMapper.toPxX(ix)}
-                y={bmdMapper.toPxY(0) - 9}
-                textAnchor="middle"
-                className="fill-amber-700 dark:fill-amber-300 font-mono text-[10px] font-semibold"
-              >
-                M=0 ({ix.toFixed(2)}m)
-              </text>
-            </g>
-          ))}
-
-          {/* Interactive vertical cursor */}
           {nearestSample && (
-            <g className="pointer-events-none">
-              <line
-                x1={sfdMapper.toPxX(nearestSample.x)}
-                y1={beamY}
-                x2={sfdMapper.toPxX(nearestSample.x)}
-                y2={442}
-                className="stroke-blue-500/50"
-                strokeDasharray="3 3"
-              />
-              <circle cx={sfdMapper.toPxX(nearestSample.x)} cy={sfdMapper.toPxY(nearestSample.shear)} r={4} className="fill-blue-600" />
-              <circle cx={bmdMapper.toPxX(nearestSample.x)} cy={bmdMapper.toPxY(nearestSample.moment)} r={4} className="fill-emerald-600" />
-            </g>
+            <div
+              data-testid="chart-hover-tooltip"
+              style={{
+                left: `${(sfdMapper.toPxX(nearestSample.x) / width) * 100}%`,
+                top: '24%',
+                transform:
+                  sfdMapper.toPxX(nearestSample.x) > width * 0.62
+                    ? 'translateX(calc(-100% - 10px))'
+                    : 'translateX(10px)',
+              }}
+              className="pointer-events-none absolute z-30 min-w-[170px] rounded-md border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 px-2.5 py-2 shadow-md text-[11px]"
+            >
+              <div className="font-mono tabular-nums text-[10px] font-semibold text-blue-700 dark:text-blue-300 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
+                Span Position x = {nearestSample.x.toFixed(2)} m
+              </div>
+              <dl className="space-y-0.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="text-slate-500 dark:text-slate-400">Shear V(x)</dt>
+                  <dd className="font-mono tabular-nums font-medium text-slate-900 dark:text-slate-100">
+                    {nearestSample.shear.toFixed(2)} kN
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="text-slate-500 dark:text-slate-400">Moment M(x)</dt>
+                  <dd className="font-mono tabular-nums font-medium text-slate-900 dark:text-slate-100">
+                    {nearestSample.moment.toFixed(2)} kN·m
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="text-slate-500 dark:text-slate-400">Reactions</dt>
+                  <dd className="font-mono tabular-nums font-medium text-slate-900 dark:text-slate-100">
+                    {data.reactionAKN.toFixed(1)} / {data.reactionBKN.toFixed(1)} kN
+                  </dd>
+                </div>
+              </dl>
+            </div>
           )}
-        </svg>
+        </div>
       </div>
     </div>
   );

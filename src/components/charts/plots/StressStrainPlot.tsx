@@ -39,6 +39,30 @@ export function StressStrainPlot({ data }: StressStrainPlotProps) {
       yLabel="Engineering Stress σ (MPa)"
       mapper={mapper}
       probeFormatter={(x, y) => `ε = ${x.toFixed(2)}% · σ = ${y.toFixed(1)} MPa`}
+      tooltipDetails={(strainPct) => {
+        let curveStress: number | null = null;
+        for (let i = 1; i < data.curve.length; i++) {
+          const p0 = data.curve[i - 1];
+          const p1 = data.curve[i];
+          if (strainPct >= p0.strainPct && strainPct <= p1.strainPct) {
+            const frac =
+              p1.strainPct > p0.strainPct
+                ? (strainPct - p0.strainPct) / (p1.strainPct - p0.strainPct)
+                : 0;
+            curveStress = p0.stressMPa + frac * (p1.stressMPa - p0.stressMPa);
+            break;
+          }
+        }
+        return [
+          {
+            label: 'Curve σ(ε)',
+            value: curveStress !== null ? `${curveStress.toFixed(1)} MPa` : 'Fractured',
+          },
+          { label: 'Yield (σ_y)', value: `${data.yieldMPa} MPa` },
+          { label: 'UTS', value: `${data.utsMPa} MPa` },
+          { label: 'Applied σ', value: `${data.appliedStressMPa.toFixed(1)} MPa` },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

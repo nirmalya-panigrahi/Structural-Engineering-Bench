@@ -1,14 +1,20 @@
 import { Info } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { FinePrintMeta } from '../../engine/types';
+import { FinePrintDataValue, FinePrintMeta } from '../../engine/types';
 
 interface FinePrintTooltipProps {
   title: string;
   finePrint: FinePrintMeta;
+  dataValues?: FinePrintDataValue[];
   align?: 'left' | 'right';
 }
 
-export function FinePrintTooltip({ title, finePrint, align = 'left' }: FinePrintTooltipProps) {
+export function FinePrintTooltip({
+  title,
+  finePrint,
+  dataValues,
+  align = 'left',
+}: FinePrintTooltipProps) {
   const [pinned, setPinned] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -16,6 +22,7 @@ export function FinePrintTooltip({ title, finePrint, align = 'left' }: FinePrint
   const tooltipId = useId();
 
   const open = pinned || hovered || focused;
+  const mergedDataValues = [...(dataValues ?? []), ...(finePrint.dataValues ?? [])];
 
   useEffect(() => {
     if (!open) return;
@@ -77,6 +84,19 @@ export function FinePrintTooltip({ title, finePrint, align = 'left' }: FinePrint
           <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
             {finePrint.summary}
           </p>
+
+          {mergedDataValues.length > 0 && (
+            <dl className="mt-2 px-2.5 py-2 rounded bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/70 space-y-1 text-[11px]">
+              {mergedDataValues.map((item) => (
+                <div key={`${item.label}-${item.value}`} className="flex items-baseline justify-between gap-3">
+                  <dt className="text-slate-600 dark:text-slate-300 shrink-0">{item.label}</dt>
+                  <dd className="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-50 text-right break-words">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
 
           {finePrint.formula && (
             <div className="mt-2 px-2 py-1.5 rounded bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 font-mono text-[11px] text-blue-700 dark:text-blue-300 break-words">

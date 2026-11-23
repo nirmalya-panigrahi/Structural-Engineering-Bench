@@ -37,6 +37,22 @@ export function EulerBucklingPlot({ data }: EulerBucklingPlotProps) {
       yLabel="Critical Buckling Stress σ_cr (MPa)"
       mapper={mapper}
       probeFormatter={(x, y) => `KL/r = ${x.toFixed(1)} · σ = ${y.toFixed(1)} MPa`}
+      tooltipDetails={(x) => {
+        const lam = Math.max(0.5, x);
+        const eMPa = data.modulusGPa * 1000;
+        const eulerAtX = (Math.PI * Math.PI * eMPa) / (lam * lam);
+        const johnsonAtX =
+          data.yieldMPa -
+          ((data.yieldMPa * data.yieldMPa) / (4 * Math.PI * Math.PI * eMPa)) * (lam * lam);
+        const isEuler = lam >= data.transitionCc;
+        const curveAtX = isEuler ? eulerAtX : johnsonAtX;
+        return [
+          { label: 'Curve σ_cr', value: `${curveAtX.toFixed(1)} MPa` },
+          { label: 'Regime at Cursor', value: isEuler ? 'Euler Elastic' : 'Johnson Inelastic' },
+          { label: 'Transition C_c', value: data.transitionCc.toFixed(1) },
+          { label: 'Design Load P_cr', value: `${data.criticalLoadKN.toFixed(1)} kN` },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

@@ -41,6 +41,44 @@ export function PmInteractionPlot({ data }: PmInteractionPlotProps) {
       yLabel="Axial Load Capacity / Demand P (kN, Compression +)"
       mapper={mapper}
       probeFormatter={(x, y) => `M = ${x.toFixed(1)} kN·m · P = ${y.toFixed(0)} kN`}
+      tooltipDetails={(m, p) => {
+        let maxT = 0;
+        const norm = Math.hypot(m, p);
+        if (norm > 1e-6) {
+          for (let i = 1; i < data.factoredEnvelope.length; i++) {
+            const p1 = data.factoredEnvelope[i - 1];
+            const p2 = data.factoredEnvelope[i];
+            const dx = p2.momentKNm - p1.momentKNm;
+            const dy = p2.axialKN - p1.axialKN;
+            const det = m * -dy - p * -dx;
+            if (Math.abs(det) < 1e-9) continue;
+            const s = (p1.momentKNm * -dy - p1.axialKN * -dx) / det;
+            const u = (m * p1.axialKN - p * p1.momentKNm) / det;
+            if (s > 0 && u >= -1e-4 && u <= 1.0001) {
+              maxT = Math.max(maxT, s);
+            }
+          }
+        }
+        const cursorDc = maxT > 1e-9 ? `${((1 / maxT) * 100).toFixed(1)}%` : '—';
+        const zone =
+          p >= data.balancedFactored.axialKN
+            ? 'Compression-Controlled'
+            : p >= 0
+              ? 'Transition / Tension'
+              : 'Net Axial Tension';
+        return [
+          { label: 'Cursor Zone', value: zone },
+          { label: 'Cursor D/C', value: cursorDc },
+          {
+            label: 'Balanced (φM_b, φP_b)',
+            value: `${data.balancedFactored.momentKNm.toFixed(0)}, ${data.balancedFactored.axialKN.toFixed(0)}`,
+          },
+          {
+            label: 'Design D/C',
+            value: `${(data.utilizationRatio * 100).toFixed(1)}% (${data.isSafe ? 'Safe' : 'Overload'})`,
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

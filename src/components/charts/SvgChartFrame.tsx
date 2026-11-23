@@ -94,6 +94,7 @@ interface SvgChartFrameProps {
   children: React.ReactNode;
   legend?: React.ReactNode;
   probeFormatter?: (dataX: number, dataY: number) => string;
+  tooltipDetails?: (dataX: number, dataY: number) => Array<{ label: string; value: string }>;
 }
 
 export function SvgChartFrame({
@@ -110,6 +111,7 @@ export function SvgChartFrame({
   children,
   legend,
   probeFormatter,
+  tooltipDetails,
 }: SvgChartFrameProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [probe, setProbe] = useState<{ px: number; py: number; x: number; y: number } | null>(null);
@@ -148,6 +150,10 @@ export function SvgChartFrame({
     [width, height, padding, toDataX, toDataY, invertY],
   );
 
+  const activeDetails = probe && tooltipDetails ? tooltipDetails(probe.x, probe.y) : null;
+  const flipX = probe ? probe.px > width * 0.62 : false;
+  const flipY = probe ? probe.py > height * 0.6 : false;
+
   return (
     <div className="space-y-2.5">
       <div className="relative w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
@@ -158,24 +164,25 @@ export function SvgChartFrame({
               ? probeFormatter
                 ? probeFormatter(probe.x, probe.y)
                 : `(${formatX(probe.x)}, ${formatY(probe.y)})`
-              : 'Hover plot to inspect coordinates'}
+              : 'Hover plot to inspect data values'}
           </span>
         </div>
 
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${width} ${height}`}
-          role="img"
-          aria-label={title}
-          onPointerMove={handlePointerMove}
-          onPointerLeave={() => setProbe(null)}
-          className="w-full h-auto block cursor-crosshair select-none"
-        >
-          <defs>
-            <clipPath id={`clip-${title.replace(/[^a-zA-Z0-9]/g, '')}`}>
-              <rect x={padding.left} y={padding.top} width={plotW} height={plotH} />
-            </clipPath>
-          </defs>
+        <div className="relative">
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${width} ${height}`}
+            role="img"
+            aria-label={title}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={() => setProbe(null)}
+            className="w-full h-auto block cursor-crosshair select-none"
+          >
+            <defs>
+              <clipPath id={`clip-${title.replace(/[^a-zA-Z0-9]/g, '')}`}>
+                <rect x={padding.left} y={padding.top} width={plotW} height={plotH} />
+              </clipPath>
+            </defs>
 
           {/* Gridlines */}
           {resolvedXTicks.map((t) => {
@@ -306,6 +313,37 @@ export function SvgChartFrame({
             {yLabel}
           </text>
         </svg>
+
+        {probe && (
+          <div
+            data-testid="chart-hover-tooltip"
+            style={{
+              left: `${(probe.px / width) * 100}%`,
+              top: `${(probe.py / height) * 100}%`,
+              transform: `translate(${flipX ? 'calc(-100% - 10px)' : '10px'}, ${flipY ? 'calc(-100% - 10px)' : '10px'})`,
+            }}
+            className="pointer-events-none absolute z-30 min-w-[170px] max-w-[240px] rounded-md border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 px-2.5 py-2 shadow-md text-[11px]"
+          >
+            <div className="font-mono tabular-nums text-[10px] font-semibold text-blue-700 dark:text-blue-300 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
+              {probeFormatter
+                ? probeFormatter(probe.x, probe.y)
+                : `${formatX(probe.x)}, ${formatY(probe.y)}`}
+            </div>
+            {activeDetails && activeDetails.length > 0 && (
+              <dl className="space-y-0.5">
+                {activeDetails.map((row) => (
+                  <div key={row.label} className="flex items-baseline justify-between gap-2">
+                    <dt className="text-slate-500 dark:text-slate-400 truncate">{row.label}</dt>
+                    <dd className="font-mono tabular-nums font-medium text-slate-900 dark:text-slate-100 shrink-0">
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+        )}
+      </div>
       </div>
 
       {legend && (

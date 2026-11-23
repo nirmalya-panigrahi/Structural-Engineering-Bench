@@ -50,6 +50,30 @@ export function AshbyPlot({ data }: AshbyPlotProps) {
       probeFormatter={(lx, ly) =>
         `ρ = ${Math.round(Math.pow(10, lx))} kg/m³ · Y = ${Math.pow(10, ly).toFixed(2)} ${data.yUnit}`
       }
+      tooltipDetails={(lx, ly) => {
+        const rho = Math.pow(10, lx);
+        const yVal = Math.pow(10, ly);
+        const guidelineY = Math.pow(data.targetIndex * (rho / 1000), data.slopeM);
+        const cursorIndex = Math.pow(Math.max(1e-6, yVal), 1 / data.slopeM) / (rho / 1000);
+        const hoveredFamily = ASHBY_FAMILIES.find((fam) => {
+          const fyMin = data.axisPair === 'E_rho' ? fam.eMin : fam.sigmaMin;
+          const fyMax = data.axisPair === 'E_rho' ? fam.eMax : fam.sigmaMax;
+          return rho >= fam.rhoMin && rho <= fam.rhoMax && yVal >= fyMin && yVal <= fyMax;
+        });
+        const top = data.candidates[0];
+        return [
+          {
+            label: 'Family Region',
+            value: hoveredFamily ? hoveredFamily.name.split('(')[0].trim() : 'Outside Bubbles',
+          },
+          { label: 'Cursor Index M', value: cursorIndex.toFixed(2) },
+          { label: 'Threshold Y_min', value: `${guidelineY.toFixed(2)} ${data.yUnit}` },
+          {
+            label: 'Top Candidate',
+            value: top ? `${top.name.split('(')[0].trim()} (M=${top.indexValue.toFixed(1)})` : '—',
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

@@ -42,6 +42,22 @@ export function MohrCoulombPlot({ data }: MohrCoulombPlotProps) {
       mapper={mapper}
       showZeroAxes={false}
       probeFormatter={(x, y) => `σ = ${x.toFixed(1)} kPa · τ = ${y.toFixed(1)} kPa`}
+      tooltipDetails={(sigma) => {
+        const phiRad = (data.frictionDeg * Math.PI) / 180;
+        const tauEnv = data.cohesionKPa + Math.max(0, sigma) * Math.tan(phiRad);
+        const dx = sigma - data.sigmaCenterKPa;
+        const r2 = data.mobRadiusKPa * data.mobRadiusKPa;
+        const tauCircle = r2 >= dx * dx ? Math.sqrt(r2 - dx * dx) : null;
+        return [
+          { label: 'Envelope τ_f(σ)', value: `${tauEnv.toFixed(1)} kPa` },
+          {
+            label: 'Circle τ(σ)',
+            value: tauCircle !== null ? `${tauCircle.toFixed(1)} kPa` : 'Outside Circle',
+          },
+          { label: 'Safety Factor FS', value: data.factorOfSafety.toFixed(2) },
+          { label: 'Failure Plane θ_f', value: `${data.failureAngleDeg.toFixed(1)}°` },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

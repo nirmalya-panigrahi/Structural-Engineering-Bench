@@ -70,6 +70,29 @@ export function MohrsCirclePlot({ data }: MohrsCirclePlotProps) {
       mapper={mapper}
       invertY
       probeFormatter={(x, y) => `σ = ${x.toFixed(1)} MPa · τ = ${y.toFixed(1)} MPa`}
+      tooltipDetails={(sigma) => {
+        const dx = sigma - data.sigmaAvg;
+        const r2 = data.radius2D * data.radius2D;
+        const circleTau = r2 >= dx * dx ? Math.sqrt(r2 - dx * dx) : null;
+        return [
+          {
+            label: '2D Circle ±τ(σ)',
+            value: circleTau !== null ? `±${circleTau.toFixed(1)} MPa` : 'Outside Circle',
+          },
+          {
+            label: 'Principals σ₁ / σ₂',
+            value: `${data.sigma1.toFixed(1)} / ${data.sigma2.toFixed(1)} MPa`,
+          },
+          {
+            label: data.mode === '3d' ? 'Max Shear (3D)' : 'Max Shear (2D)',
+            value: `${(data.mode === '3d' ? data.tauMax3D : data.tauMax2D).toFixed(1)} MPa`,
+          },
+          {
+            label: `Rotated (${data.thetaDeg}°)`,
+            value: `${data.sigmaXPrime.toFixed(1)}, ${data.tauXYPrime.toFixed(1)} MPa`,
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

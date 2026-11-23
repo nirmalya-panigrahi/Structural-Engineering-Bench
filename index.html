@@ -17,5 +17,229 @@
   <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-blue-600/15 selection:text-blue-700 dark:selection:bg-blue-400/20 dark:selection:text-blue-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Self-contained Engineering Benches Footer -->
+    <style>
+      .bench-footer {
+        --bf-bg: #F1E8D4;
+        --bf-text: #3B3A38;
+        --bf-link: #1F4E79;
+        --bf-link-hover: #143554;
+        --bf-rule: #6F6D68;
+        --bf-flourish: #6F6D68;
+        --bf-current-bg: rgba(217, 164, 65, 0.22);
+
+        position: static;
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+        background-color: var(--bf-bg);
+        color: var(--bf-text);
+        border-top: 1px solid var(--bf-rule);
+        font-family: "EB Garamond", Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        text-align: center;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .bench-footer {
+          --bf-bg: #26211A;
+          --bf-text: #D8D2C4;
+          --bf-link: #7FB0DB;
+          --bf-link-hover: #6298C8;
+          --bf-rule: #8C8A85;
+          --bf-flourish: #8C8A85;
+          --bf-current-bg: rgba(217, 164, 65, 0.18);
+        }
+      }
+
+      .bench-footer *,
+      .bench-footer *::before,
+      .bench-footer *::after {
+        box-sizing: border-box;
+      }
+
+      .bench-footer .bench-footer__inner {
+        max-width: 720px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .bench-footer .bench-footer__flourish {
+        display: block;
+        width: 164px;
+        height: 14px;
+        margin: 0 auto 2px;
+        color: var(--bf-flourish);
+      }
+
+      .bench-footer .bench-footer__nav {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border: 1px solid var(--bf-rule);
+      }
+
+      .bench-footer .bench-footer__cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 10px;
+        font-size: 15px;
+        line-height: 1.3;
+        border-right: 1px solid var(--bf-rule);
+        text-decoration: none;
+      }
+
+      .bench-footer .bench-footer__cell:last-child {
+        border-right: none;
+      }
+
+      .bench-footer a.bench-footer__cell {
+        color: var(--bf-link);
+        font-weight: 400;
+      }
+
+      .bench-footer a.bench-footer__cell:hover {
+        color: var(--bf-link-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .bench-footer a.bench-footer__cell:focus-visible,
+      .bench-footer .bench-footer__central:focus-visible,
+      .bench-footer .bench-footer__more a:focus-visible {
+        outline: 2px solid var(--bf-link);
+        outline-offset: 2px;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .bench-footer .bench-footer__cell[aria-current="page"] {
+        background-color: var(--bf-current-bg);
+        color: var(--bf-text);
+        font-weight: 700;
+        cursor: default;
+      }
+
+      .bench-footer .bench-footer__central {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 14px;
+        font-size: 17px;
+        color: var(--bf-link);
+        text-decoration: none;
+      }
+
+      .bench-footer .bench-footer__central:hover {
+        color: var(--bf-link-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .bench-footer .bench-footer__more {
+        margin: 0;
+        font-size: 15px;
+        color: var(--bf-text);
+        max-width: 100%;
+      }
+
+      .bench-footer .bench-footer__more a {
+        color: var(--bf-link);
+        text-decoration: none;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .bench-footer .bench-footer__more a:hover {
+        color: var(--bf-link-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      @media (max-width: 599px) {
+        .bench-footer .bench-footer__nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .bench-footer .bench-footer__cell:nth-child(1),
+        .bench-footer .bench-footer__cell:nth-child(2) {
+          border-bottom: 1px solid var(--bf-rule);
+        }
+
+        .bench-footer .bench-footer__cell:nth-child(2) {
+          border-right: none;
+        }
+
+        .bench-footer .bench-footer__more-url {
+          display: block;
+          margin-top: 2px;
+        }
+      }
+    </style>
+
+    <footer class="bench-footer">
+      <div class="bench-footer__inner">
+        <svg class="bench-footer__flourish" viewBox="0 0 164 14" fill="none" aria-hidden="true">
+          <line x1="2" y1="2" x2="2" y2="12" stroke="currentColor" stroke-width="1" />
+          <line x1="162" y1="2" x2="162" y2="12" stroke="currentColor" stroke-width="1" />
+          <line x1="5" y1="7" x2="159" y2="7" stroke="currentColor" stroke-width="1" />
+          <polygon points="2,7 9,4.5 9,9.5" fill="currentColor" />
+          <polygon points="162,7 155,4.5 155,9.5" fill="currentColor" />
+        </svg>
+
+        <nav class="bench-footer__nav" aria-label="Engineering benches">
+          <a class="bench-footer__cell" href="https://nirmalya-panigrahi.github.io/Structural-Engineering-Bench/">Structural</a>
+          <a class="bench-footer__cell" href="https://nirmalya-panigrahi.github.io/Process-Engineering-Bench/">Process</a>
+          <a class="bench-footer__cell" href="https://nirmalya-panigrahi.github.io/Control-Engg-Bench/">Control</a>
+          <a class="bench-footer__cell" href="https://nirmalya-panigrahi.github.io/Circuit-Bench-Lab/">Circuit</a>
+        </nav>
+
+        <a class="bench-footer__central" href="https://nirmalya-panigrahi.github.io/engineering-bench/">All engineering benches &rarr;</a>
+
+        <p class="bench-footer__more">
+          Find more tools at:
+          <a class="bench-footer__more-url" href="https://nirmalya-panigrahi.github.io/">https://nirmalya-panigrahi.github.io/</a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var nav = document.querySelector('.bench-footer .bench-footer__nav');
+        if (!nav) return;
+        var normalize = function (p) {
+          return (p || '/').replace(/\/index\.html$/i, '').replace(/\/+$/, '') || '/';
+        };
+        var currentPath = normalize(window.location.pathname);
+        var links = nav.querySelectorAll('a[href]');
+        for (var i = 0; i < links.length; i++) {
+          var link = links[i];
+          var linkPath;
+          try {
+            linkPath = normalize(new URL(link.getAttribute('href'), window.location.origin).pathname);
+          } catch (e) {
+            continue;
+          }
+          if (currentPath === linkPath || currentPath.indexOf(linkPath + '/') === 0) {
+            var currentEl = document.createElement('span');
+            currentEl.className = link.className;
+            currentEl.setAttribute('aria-current', 'page');
+            currentEl.textContent = link.textContent;
+            link.parentNode.replaceChild(currentEl, link);
+            break;
+          }
+        }
+      })();
+    </script>
   </body>
 </html>

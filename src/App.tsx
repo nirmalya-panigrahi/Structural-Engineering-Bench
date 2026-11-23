@@ -90,6 +90,19 @@ export default function App() {
                   standard: meta.governingStandard,
                   assumptions: meta.assumptions[0],
                 }}
+                dataValues={
+                  calculation.valid
+                    ? [
+                        ...(calculation.verdict
+                          ? [{ label: 'Status', value: calculation.verdict.label }]
+                          : []),
+                        ...calculation.metrics.slice(0, 3).map((m) => ({
+                          label: m.symbol || m.label,
+                          value: `${m.value}${m.unit && m.unit !== '—' ? ` ${m.unit}` : ''}`,
+                        })),
+                      ]
+                    : [{ label: 'Status', value: `${calculation.issues.length} invalid input(s)` }]
+                }
               />
             </div>
           </div>

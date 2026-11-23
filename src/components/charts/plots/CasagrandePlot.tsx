@@ -29,6 +29,33 @@ export function CasagrandePlot({ data }: CasagrandePlotProps) {
       mapper={mapper}
       showZeroAxes={false}
       probeFormatter={(x, y) => `LL = ${x.toFixed(1)}% · PI = ${y.toFixed(1)}%`}
+      tooltipDetails={(ll, pi) => {
+        const aLine = Math.max(0, 0.73 * (ll - 20));
+        const uLine = Math.max(0, 0.9 * (ll - 8));
+        let zone: string;
+        if (pi > uLine) {
+          zone = 'Above U-Line (Verify)';
+        } else if (ll < 50 && pi >= 4 && pi <= 7 && pi >= aLine) {
+          zone = 'CL-ML (Silty Clay)';
+        } else if (ll < 50 && pi >= aLine) {
+          zone = 'CL (Low-Plasticity Clay)';
+        } else if (ll < 50) {
+          zone = 'ML / OL (Low-Plasticity Silt)';
+        } else if (pi >= aLine) {
+          zone = 'CH (High-Plasticity Clay)';
+        } else {
+          zone = 'MH / OH (Elastic Silt)';
+        }
+        return [
+          { label: 'Cursor Zone', value: zone },
+          { label: 'A-Line PI(LL)', value: `${aLine.toFixed(1)}%` },
+          { label: 'U-Line PI(LL)', value: `${uLine.toFixed(1)}%` },
+          {
+            label: 'Sample USCS',
+            value: `${data.uscsSymbol} (${data.liquidLimit}%, ${data.plasticityIndex}%)`,
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">

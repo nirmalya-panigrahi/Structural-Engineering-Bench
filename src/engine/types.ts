@@ -20,12 +20,18 @@ export type ModuleCategory =
 
 export type StatusTone = 'safe' | 'caution' | 'danger' | 'neutral';
 
+export interface FinePrintDataValue {
+  label: string;
+  value: string;
+}
+
 export interface FinePrintMeta {
   summary: string;
   formula?: string;
   standard?: string;
   assumptions?: string;
   validRange?: string;
+  dataValues?: FinePrintDataValue[];
 }
 
 export interface SelectOption {

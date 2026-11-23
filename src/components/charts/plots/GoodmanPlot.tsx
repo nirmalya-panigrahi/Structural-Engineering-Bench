@@ -54,6 +54,28 @@ export function GoodmanPlot({ data }: GoodmanPlotProps) {
       yLabel="Alternating Stress σ_a (MPa)"
       mapper={mapper}
       probeFormatter={(x, y) => `σ_m = ${x.toFixed(1)} MPa · σ_a = ${y.toFixed(1)} MPa`}
+      tooltipDetails={(m, a) => {
+        const goodmanAllow = m <= 0 ? data.se : Math.max(0, data.se * (1 - m / data.sut));
+        const yieldAllow = Math.max(0, data.sy - Math.abs(m));
+        const localGoodmanDenom = a / data.se + Math.max(0, m) / data.sut;
+        const localYieldDenom = (a + Math.abs(m)) / data.sy;
+        const localN = Math.min(
+          localGoodmanDenom > 1e-6 ? 1 / localGoodmanDenom : Infinity,
+          localYieldDenom > 1e-6 ? 1 / localYieldDenom : Infinity,
+        );
+        return [
+          { label: 'Goodman Limit', value: `${goodmanAllow.toFixed(1)} MPa` },
+          { label: 'Yield Limit', value: `${yieldAllow.toFixed(1)} MPa` },
+          {
+            label: 'Cursor SF (n)',
+            value: Number.isFinite(localN) ? `${localN.toFixed(2)}×` : '∞',
+          },
+          {
+            label: 'Design Point',
+            value: `(${data.sigmaM}, ${data.sigmaA}) MPa`,
+          },
+        ];
+      }}
       legend={
         <>
           <span className="inline-flex items-center gap-1.5">
